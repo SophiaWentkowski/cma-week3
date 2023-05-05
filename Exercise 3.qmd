@@ -182,11 +182,11 @@ posmo_filter <- posmo_filter |>
   ungroup()
 
 
-posmo_filter <- posmo_filter |>
+posmo_static <- posmo_filter |>
     ungroup() |>
     mutate(static = stepMean < mean(stepMean, na.rm = TRUE))
 
-posmo_filter <- posmo_filter |>
+posmo_static <- posmo_filter |>
     filter(!static)
 ```
 
@@ -194,11 +194,34 @@ posmo_filter <- posmo_filter |>
 ## Task 3 Visualize segmented trajectories
 
 ```{r}
-posmo_filter |> 
+posmo_static |> 
   mutate(static =stepMean < mean(stepMean, na.rm =TRUE)) |> 
   ggplot(aes(X,Y))+
   geom_path()+
   geom_point(aes(color=static))+
   coord_fixed()
+```
+
+## Task 4: Segment-based analysis
+
+In applying Laube and Purves (2011), we’ve come as far as step b) in Figure 10.1. In order to complete the last steps (c and d), we need a unique ID for each segment that we can use as a grouping variable. The following function does just that (it assigns unique IDs based on the column static which you created in Task 2). You will learn about functions next week. For now, just copy the following code chunk into your script and run it.
+
+```{r}
+rle_id <- function(vec) {
+    x <- rle(vec)$lengths
+    as.factor(rep(seq_along(x), times = x))
+}
+```
+You can use the newly created function rle_id to assign unique IDs to subtrajectories (as shown below). Visualize the moving segments by colourizing them by segment_ID. Then use segment_ID as a grouping variable to determine the segments duration and remove short segments (e.g. segments with a duration < 5 Minutes)
+
+Commit your changes with a meaningful commit message.
+
+```{r}
+posmo_filter <- posmo_filter |>
+    mutate(segment_id = rle_id(static))
+
+
+  
+head(posmo_filter)
 ```
 
